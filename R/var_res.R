@@ -6,7 +6,7 @@
 #' @param dataset data frame with spatial data: x-coordinates (x), y coordinates (y), and Bernoulli responses at those locations (res)
 #' @param max The maximum number of subdivision iterations the algorithm will perform
 #' @return A list containing a data frame for each iteration of the subdivision algorithm; and a vector of the number of boxes eligible for subdivision at each iteration.
-#'
+#' @export
 #' @examples
 #' data(hitter)
 #' data <- varyres(hitter, mean, 200)
