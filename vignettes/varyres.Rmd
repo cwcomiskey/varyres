@@ -17,11 +17,11 @@ vignette: >
 
 Variable-resolution (VR) heat maps integrate region-appropriate resolutions, and convey the relative data abundance of data in those regions. This vignette introduces a motivating dataset, then shows how to use `varyres()` to create a VR heat map.
 
-You can download mapapp from GitHub with a function in the devtools package.
+You can download varyres from GitHub with a function in the devtools package.
 
 ```{r, eval = FALSE}
 library(devtools)
-devtools::install_github('cwcomiskey/mapapp')
+devtools::install_github('cwcomiskey/varyres')
 ```
 
 ## Data: `hitter`
