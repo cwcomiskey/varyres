@@ -15,20 +15,65 @@ vignette: >
   data(hitter)
 ```
 
-Variable-resolution (VR) heat maps integrate region-appropriate resolutions, and convey the relative data abundance of data in those regions. This vignette introduces a motivating dataset, then shows how to use `varyres()` to create a VR heat map.
+Variable-resolution (VR) heat maps are a solution to the problem of choosing a resolution for a heatmap.  They integrate region-appropriate resolutions, and convey the relative data abundance of data in those regions. 
 
-You can download varyres from GitHub with a function in the devtools package.
+Consider the scatterplot of the locations of pitches to baseball player Jhonny Peralta in the MLB from 2008 to 2015 in (a) below.  To visualize his success at various locations we might create a heatmap of his success rate by gridding the domain and calculating the empirical success rate of pitches in each grid cell.  Examples of the resulting heatmap for resolutions of 4x4 and 16x16 are shown in (b) and (c).  Which resolution is more appropriate? In some areas of the domain, i.e. the center, the 4x4 resolution is too low but in others, i.e. the edges, the 16x16 resolution is too high.  A variable-resolution heatmap, (d), solves this problem by allowing the resolution to be determined by the underlying concentration of data points.
+
+```{r motivating-plots, echo = FALSE, fig.height=2, fig.width=2, message=FALSE, warning=FALSE, fig.cap = "Caption"}
+library(varyres)
+library(ggplot2)
+
+no_axis_labs <- theme(axis.title.x=element_blank(),
+  axis.title.y=element_blank())
+
+
+# a
+ggplot(hitter, aes(x, y)) +
+  geom_point(size = 0.25, alpha = 1/15) +
+  coord_equal() +
+  labs(title = "(a)") +
+  no_axis_labs 
+
+vr_1 <- varyres(data = hitter, cutoff = 1, max = 4)
+
+# b
+mapit(vr_1[[3]]) + spec_fcn(g = FALSE, upper = 0.5) +
+  no_axis_labs +
+  labs(title = "(b)") 
+
+# c
+mapit(vr_1[[5]]) + spec_fcn(g = FALSE, upper = 0.5) +
+  no_axis_labs +
+  labs(title = "(c)") 
+
+vr_200 <- varyres(data = hitter, cutoff = 200, max = 4)
+
+mapit(vr_200[[5]]) + spec_fcn(g = FALSE, upper = 0.5) +  
+  no_axis_labs +
+  labs(title = "(d)") 
+```
+
+This vignette introduces `varyres` a package to create these variable resolution heatmaps.  
+
+## Installation
+
+You can download `varyres` from GitHub with a function in the devtools package.
 
 ```{r, eval = FALSE}
-library(devtools)
+# install.packages("devtools")
 devtools::install_github('cwcomiskey/varyres')
 ```
 
-## Data: `hitter`
+## Usage
+
+To illustrate the use of `varyres` we will use the `hitter` dataset that is provided with the varyres package (and used to create the motivating plots above).
+
+### Data: `hitter`
 
 `hitter` contains `r dim(hitter)[1]` rows/observations, one for each swing baseball player Jhonny Peralta took between 2008 and 2015. Each observation includes a pitch location and a swing outcome. The data is called PITCHf/x data, and comes from [Sportvision, Inc](http://www.sportvision.com/) in conjunction with [Major League Baseball Advanced Media](http://www.mlbam.com/).
 
 ```{r}
+library(varyres)
 head(hitter)
 ```
 
@@ -39,57 +84,23 @@ head(hitter)
 * `res` is a Bernoulli random variable that equals 1 if the swing was successful, and 0 if not.
 * `des` gives a short description of the play.
 
-## Motivation
-Imagine you have a continuous domain spatial dataset and you want to make a heat map. However, some regions of the domain have many more observations than others, so you are having trouble choosing the best resolution. For example, the observation dispersion might look like this. 
+### A Variable-Resolution Heat Map
 
-```{r, echo = FALSE, fig.height=3, fig.width=3, fig.show = "hold", fig.align = "center"}
-  library(ggplot2)
+The function `varyres(...)` creates, from your data set, a VR-ready data frame. From there you can use `ggplot2` (or your other favorite plotting pacakge) to create the VR heat map. `varyres` provides the `mapit()` function as a quick way to genreate a ggplot2 heatmap from `varyres()` output.
 
-  ggplot(hitter, aes(x, y)) +
-    geom_point(size = 0.25, alpha = 1/15) +
-    coord_equal() +
-  labs(title = "Peralta Swing Locations",
-  x = "Feet from \n Middle of Home Plate",
-  y = "Feet Off Ground") +
-  theme(plot.title = element_text(hjust = 0.5))
-```
-
-
-If the whole domain looked as dense as the center we would choose one resolution; but if it looked as sparse as the edges we would choose another. Which region should primarily inform our choice? These heat maps, with box sample sizes printed, give a few possibilities.
-
-```{r, echo=FALSE, fig.height=2, fig.width=2, message=FALSE, warning=FALSE}
-
-vr <- varyres(data = hitter, cutoff = 1, max = 4)
-
-mapit(vr[[3]]) + spec_fcn(g = FALSE) + theme(axis.title.x=element_blank(), axis.title.y=element_blank()) +
-  text_fcn(s = 3)
-
-mapit(vr[[4]]) + spec_fcn(g = FALSE) +  theme(axis.title.x=element_blank(), axis.title.y=element_blank()) +
-  text_fcn(s = 2)
-
-mapit(vr[[5]]) + spec_fcn(g = FALSE, upper = 0.5) +  theme(axis.title.x=element_blank(), axis.title.y=element_blank()) +
-  text_fcn(s = 1)
-```
-
-In the first map the margins look reasonable, but the central boxes contain thousands of swings each. The second map improves the graphic, but leaves some boxes virtually empty (one actually empty). The third map looks appropriate in the middle, but quite a few boxes toward the margins now have very few observations. VR heat maps integrate the resolutions appropriate for each region.
-
-## A Variable-Resolution Heat Map
-
-The function `varyres(...)` creates, from your data set, a VR-ready data frame. From there we can use `ggplot2` to create the VR heat map. 
-
-The VR algorithm works by subdividing individual grid boxes until their sample size drops below a user-specified threshold---the `cutoff` argument. 
-
-```{r,  fig.height=3, fig.width=3, eval = TRUE, fig.align = "center", echo = TRUE}
+For example, the subdivision presented above in (d), was calculated with,
+```{r}
 vr <- varyres(data = hitter, cutoff = 200, max = 4)
 ```
-```{r, eval = TRUE,  fig.height=3, fig.width=3, fig.align = "center", echo = FALSE}
-ggplot(vr[[5]], aes(x = x, y = y)) +
-  with(vr[[5]], geom_tile(aes(fill = statistic), width = width, height = height)) +
-  coord_equal() +
-  scale_fill_distiller(palette = "Spectral", guide = FALSE) +
-  geom_text(aes(label = count), size = 2)
+
+The resulting object, `vr`, is a list where each element describes an iteration of the subdivision algorithm.  The ?? element contains the final iteration and can then be displayed
+```{r, fig.width = 4, fig.height = 4}
+mapit(vr[[5]]) 
 ```
+
 The VR map has finer resolution in the center, more coarse resolution around the edges, and in-between as needed. Also, notice how the box sizes implicitly convey the varying data concentration: bigger boxes correspond to less data, smaller boxes to more data. The sample sizes printed on the grid boxes explicitly show this correspondence.
+
+## Details
 
 The `cutoff` argument gives the user control over how populated boxes will be. For example, `cutoff = 100` gives this map.
 
@@ -100,11 +111,17 @@ mapit(vr[[6]]) + spec_fcn()
 
 Notice one prominent difference: smaller central boxes, due to further subdivision.
 
+[Add something about `max` argument] 
+
+[Add something about adding the numbers to boxes] 
+
 ## Iterations
 
 `varyres(...)` returns the subdivision iterations, and seeing these steps helps understand how the algorithm works. The sequence of subdivisions here proceeds by subdividing boxes with sample sizes above `cutoff = 100`.
 
 ```{r, fig.width = 1.5, fig.height = 1.5, echo = FALSE}
+vr <- varyres(data = hitter, cutoff = 100, max = 5)
+
 mapit(vr[[1]]) + spec_fcn(g = FALSE) + nal_fcn()
 mapit(vr[[2]]) + spec_fcn(g = FALSE) + nal_fcn()
 mapit(vr[[3]]) + spec_fcn(g = FALSE) + nal_fcn()
