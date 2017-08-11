@@ -23,6 +23,6 @@ This function creates variable resolution heat maps accroding to a stopping rule
 }
 \examples{
 data(hitter)
-data <- varyres(hitter, mean, 200)
+data <- varyres(hitter, mean, cutoff = 200, max = 6)
 mapit(data[[4]])
 }

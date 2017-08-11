@@ -9,18 +9,8 @@
 #' @export
 #' @examples
 #' data(hitter)
-#' data <- varyres(hitter, mean, 200)
+#' data <- varyres(hitter, mean, cutoff = 200, max = 6)
 #' mapit(data[[4]])
-
-# devtools::document()
-# devtools::install("~/Desktop/ResearchRepo/varyres")
-# devtools::install_github('cwcomiskey/ResearchRepo','cwcomiskey')
-# devtools::load_all()
-
-# devtools::use_vignette("my-vingette")
-
-# vr <- varyres(hitter, cutoff = 200, max = 6)
-# mapit(vr[[5]])
 
 varyres <- function(dataset, fun = mean, cutoff, max = 6){
 

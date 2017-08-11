@@ -5,11 +5,11 @@ mapit <- function(ABCE = ABCE) {
   coord_equal()
 } # Plane Jane
 
-spec_fcn <- function(g = TRUE){
+spec_fcn <- function(g = TRUE, upper = 0.17, sub = "b"){
   list(scale_fill_distiller(palette = "Spectral",
-                            #limits = c(0, 0.17),
+                            limits = c(0, upper),
                 guide = if(g)
-                guide_legend(title = expression(hat(p)))
+                guide_legend(title = expression(hat(p)[]))
                 else guide = FALSE)
        )
 } # Spectral
@@ -20,10 +20,9 @@ text_fcn <- function(s = 8){
 
 lab_fcn <- function(s1 = 25, s2 = 30){
   list(
-    labs(title = "Peralta Variable-Resolution \n Empirical Success Probability",
-         # subtitle = "Johny Peralta",
-         x = "Feet from \n Middle of Home Plate",
-         y = "Feet Off Ground"),
+    labs(title = "Variable-Resolution") ,
+         # x = "Feet from \n Middle of Home Plate",
+         # y = "Feet Off Ground"),
     theme(legend.key.size = unit(2, "cm"),
           legend.text = element_text(size = s2),
           legend.title = element_text(size = s2),
