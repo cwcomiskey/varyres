@@ -7,7 +7,7 @@
 \format{A data frame with 9177 rows and 4 variables:
 \describe{
   \item{x}{horizontal location, in feet, from the middle of home plate when the pitch passed through the strike zone}
-  \item{z}{vertical location, in feet, from the ground when the pitch passed through the strike zone (negative values correspond to pitches that bounced before reaching home plate)}
+  \item{y}{vertical location, in feet, from the ground when the pitch passed through the strike zone (negative values correspond to pitches that bounced before reaching home plate)}
   \item{res}{Bernoulli outcome: 1 if swing resulted in a hit, 0 otherwise}
   \item{des}{A short description of the swing outcome}
 }}
