@@ -1,56 +1,30 @@
-mapit <- function(ABCE = ABCE) {
-  ggplot2::ggplot(ABCE, aes(x = x, y = y)) +
-  ggplot2::geom_tile(data = ABCE, aes(fill = statistic),
-                       width = ABCE$width, height = ABCE$height) +
-  coord_equal()
-} # Plane Jane
+#' Quick Heat Map in ggplot2
+#'
+#' This function gives you a quick, basic heat map to use for data structured in the way described in the vignette.
+#' @param dat The data frame you are using.
+#'
+#' * coordinate columns must be named "x", "y";
+#'
+#' * box width/height columns must be named "width", "height";
+#'
+#' * statistic of interest must be names "statistic".
+#' @param g TRUE or FALSE - Whether or not to include a legend, defaults to "FALSE"
+#' @return A ggplot2 heat map.
+#' @export
+#' @examples
+#' hitterVR <- varyres(hitter, mean, cutoff = 200, max = 6)
+#' mapit(hitterVR[[4]])
 
-spec_fcn <- function(g = TRUE, upper = 0.17, sub = "b"){
-  list(scale_fill_distiller(palette = "Spectral",
-                            limits = c(0, upper),
+
+mapit <- function(dat, g = FALSE) {
+  ggplot2::ggplot(dat, ggplot2::aes(x = x, y = y)) +
+    ggplot2::geom_tile(data = dat, ggplot2::aes(fill = dat$stat),
+                       width = dat$width, height = dat$height) +
+    ggplot2::scale_fill_distiller(palette = "YlOrRd",
+                                  trans = "reverse",
                 guide = if(g)
-                guide_legend(title = expression(hat(p)[]))
-                else guide = FALSE)
-       )
-} # Spectral
+                  ggplot2::guide_legend("Statistic")
+                else guide = FALSE) +
+    ggplot2::coord_equal()
+}
 
-text_fcn <- function(s = 8){
-  list(geom_text(aes(label = count), size = s))
-} # Print counts
-
-lab_fcn <- function(s1 = 25, s2 = 30){
-  list(
-    labs(title = "Variable-Resolution") ,
-         # x = "Feet from \n Middle of Home Plate",
-         # y = "Feet Off Ground"),
-    theme(legend.key.size = unit(2, "cm"),
-          legend.text = element_text(size = s2),
-          legend.title = element_text(size = s2),
-          legend.title.align = 0.25,
-          axis.title.x = element_text(size=s1),
-          axis.title.y = element_text(size=s1),
-          title = element_text(size = s2),
-          plot.title = element_text(hjust = 0.5),
-          plot.subtitle = element_text(hjust = 0.5),
-          axis.text = element_text(size = s1))
-  )
-} # Labels
-
-sz_fcn <- function(width = 1.5){
-  kzone <- data.frame(x = c(-0.75, -0.75, 0.75, 0.75, -0.75),
-                      y = c(1.5, 3.5, 3.5, 1.5, 1.5))
-  list(geom_path(data = kzone,
-                 aes(x = c(-0.75, -0.75, 0.75, 0.75, -0.75),
-                     y = c(1.5, 3.5, 3.5, 1.5, 1.5)),
-                 lwd = width, col = "blue", linetype = 2))
-} # strike zone
-
-nal_fcn <- function(){
-  list(theme(axis.title.x=element_blank(), axis.title.y=element_blank())
-       )
-} # No-axis-labels function
-
-# g <- grid.arrange(G1, G4, G16, G64, G256, G1024, ncol = 3)
-# dev.off()
-
-# ggsave(g, "/Users/ABC/Desktop/ResearchRepo/Images/Chapter4x4.jpg", width = 8.5, height = 8.5)

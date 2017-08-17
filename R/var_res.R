@@ -12,11 +12,11 @@
 #' data <- varyres(hitter, mean, cutoff = 200, max = 6)
 #' mapit(data[[4]])
 
-varyres <- function(dataset, fun = mean, cutoff, max = 6){
+varyres <- function(dataset, cutoff, fun = mean,  max = 6){
 
 info_list <- list()       # list of information, for return()
 iter <- 0                 # subdivision iterations
-elig_boxes <- numeric()   # eligible boxes (count > cutoff)
+# elig_boxes <- numeric()   # eligible boxes (count > cutoff)
 
 info <- with(dataset,
              cbind.data.frame(
@@ -94,10 +94,10 @@ while(sum(info$count > cutoff) > 0 & iter < max) {
                            loop_data)
 
   info_list[[iter + 1]] <- info
-  elig_boxes[iter] <- counter
+#  elig_boxes[iter] <- counter
 
   } # "while" loop
 
-info_list[[iter+2]] <- elig_boxes
+# info_list[[iter+2]] <- elig_boxes
 return(info_list)
 }
