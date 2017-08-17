@@ -14,9 +14,9 @@ library(varyres)
 library(ggplot2)
 ```
 
-Variable-resolution (VR) heat maps are a solution to the problem of choosing a resolution for a heatmap.  They integrate region-appropriate resolutions, and convey the relative data abundance of data in those regions. 
+Variable-resolution (VR) heat maps are a solution to the problem of choosing a resolution for a heat map.  They integrate region-appropriate resolutions, and convey the relative data abundance of data in those regions. 
 
-Consider the scatterplot of the locations of pitches to baseball player Jhonny Peralta in the MLB from 2008 to 2015 in (a) below.  To visualize his success at various locations we might create a heatmap of his success rate by gridding the domain and calculating the empirical success rate of pitches in each grid cell.  Examples of the resulting heatmap for resolutions of 4x4 and 16x16 are shown in (b) and (c).  Which resolution is more appropriate? In some areas of the domain, i.e. the center, the 4x4 resolution is too low but in others, i.e. the edges, the 16x16 resolution is too high.  A variable-resolution heatmap, (d), solves this problem by allowing the resolution to be determined by the underlying concentration of data points.
+Consider the scatterplot of the locations of pitches to baseball player Jhonny Peralta in the MLB from 2008 to 2015 in (a) below.  To visualize his success at various locations we might create a heat map of his success rate by gridding the domain and calculating the empirical success rate of pitches in each grid cell.  Examples of the resulting heat map for resolutions of 4x4 and 16x16 are shown in (b) and (c).  Which resolution is more appropriate? In some areas of the domain, i.e. the center, the 4x4 resolution is too low but in others, i.e. the edges, the 16x16 resolution is too high.  A variable-resolution heat map, (d), solves this problem by allowing the resolution to be determined by the underlying concentration of data points.
 
 ```{r motivating-plots, echo = FALSE, fig.height=2, fig.width=2, message=FALSE, warning=FALSE, fig.cap = "Caption"}
 library(ggplot2)
@@ -50,11 +50,11 @@ mapit(vr_200[[5]]) +
   labs(title = "(d)") 
 ```
 
-This vignette introduces `varyres` a package to create these variable resolution heatmaps.  
+This vignette introduces **varyres**, a package to create these variable resolution heat maps.  
 
 ## Installation
 
-You can download `varyres` from GitHub with a function in the devtools package.
+You can download **varyres** from GitHub with a function in the **devtools** package.
 
 ```{r, eval = FALSE}
 # install.packages("devtools")
@@ -63,7 +63,7 @@ devtools::install_github('cwcomiskey/varyres')
 
 ## Usage
 
-To illustrate the use of `varyres` we will use the `hitter` dataset that is provided with the varyres package (and used to create the motivating plots above).
+To illustrate the use of `varyres` the function, we will use the `hitter` dataset that is provided with the **varyres** package (and used to create the motivating plots above).
 
 ### Data: `hitter`
 
@@ -83,39 +83,34 @@ head(hitter)
 
 ### A Variable-Resolution Heat Map
 
-The function `varyres(...)` creates, from your data set, a VR-ready data frame. From there you can use `ggplot2` (or your other favorite plotting pacakge) to create the VR heat map. `varyres` provides the `mapit()` function as a quick way to genreate a ggplot2 heatmap from `varyres()` output.
+The function `varyres(...)` creates, from your data set, a VR-ready data frame. From there you can use `ggplot2` (or your other favorite plotting package) to create the VR heat map. **varyres** provides the `mapit()` function as a quick way to generate a ggplot2 heat map from `varyres()` output.
 
 For example, the subdivision presented above in (d), was calculated with,
 ```{r}
-vr <- varyres(data = hitter, cutoff = 200, max = 4)
+vr <- varyres(data = hitter, cutoff = 200, fun = mean, max = 4)
 ```
 
 The resulting object, `vr`, is a list where each element describes an iteration of the subdivision algorithm.  The last element contains the final iteration and can then be displayed
 ```{r, fig.width = 4, fig.height = 4, fig.align = "center"}
-mapit(vr[[5]], g = TRUE) 
+mapit(vr[[5]], g = TRUE) + 
+  geom_text(aes(label = count), size = 2)
 ```
 
-The VR map has finer resolution in the center, more coarse resolution around the edges, and in-between as needed. Also, notice how the box sizes implicitly convey the varying data concentration: bigger boxes correspond to less data, smaller boxes to more data. The sample sizes printed on the grid boxes explicitly show this correspondence.
+The VR map has finer resolution in the center, more coarse resolution around the edges, and in-between as needed. Also, notice how the box sizes implicitly convey the varying data concentration: bigger boxes correspond to less concentrated data, smaller boxes to more concentrated data. The sample sizes printed on the grid boxes (with `geom_text()`) explicitly show this correspondence.
 
 ## Details
 
-The `cutoff` argument gives the user control over maximum box sample size. For example, `cutoff = 100` means each box will have at most 100 observations, which gives this map.
+The `cutoff` argument gives the user control over maximum box sample size. For example, `cutoff = 100` means each box will have at most 100 observations, because boxes over the cutoff will be subdivided further. Using `cutoff = 100` gives this map.
 
 ```{r,  fig.height=4, fig.width=4, fig.align = "center", echo = FALSE}
-vr <- varyres(data = hitter, cutoff = 100, max = 5)
+vr <- varyres(data = hitter, cutoff = 100, fun = mean, max = 5)
 mapit(vr[[6]], g = TRUE) 
 ```
 
 Notice one prominent difference: smaller central boxes, due to further subdivision.
 
-The `max` argument specifices a maximum number of iterations. For example, if you accidentally specify `cutoff = 0` the algorithm would never stop without `max = 6` as the default.
+The `max` argument specifies a maximum number of iterations. For example, if you accidentally specify `cutoff = 0` the algorithm would never stop without `max = 6` as the default. The `fun` argument specifies what grid box summary function to use. By default, `fun = mean`, so the statistic calculated for each box, and stored as the variable `statistic` , is the mean of the `res` variable. 
 
-You may want to add box sample size to your plot, and it's pretty easy to do with the data stored in `vr` and `geom_text()`.
-```{r,  fig.height=4, fig.width=4, fig.align = "center"}
-library(ggplot2)
-mapit(vr[[4]], g = TRUE) + 
-  geom_text(aes(label = count), size = 4)
-```
 
 ## Iterations
 

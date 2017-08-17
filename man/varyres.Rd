@@ -4,14 +4,14 @@
 \alias{varyres}
 \title{A variable-resolution heat map generator}
 \usage{
-varyres(dataset, fun = mean, cutoff, max = 6)
+varyres(dataset, cutoff, fun = mean, max = 6)
 }
 \arguments{
 \item{dataset}{data frame with spatial data: x-coordinates (x), y coordinates (y), and Bernoulli responses at those locations (res)}
 
-\item{fun}{Function to apply to responses in each box}
-
 \item{cutoff}{Box subdivisions cease when a box sample size drops below the cutoff}
+
+\item{fun}{Function to apply to responses in each box}
 
 \item{max}{The maximum number of subdivision iterations the algorithm will perform}
 }

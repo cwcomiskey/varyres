@@ -1,9 +1,10 @@
 #' A variable-resolution heat map generator
 #'
 #' This function creates variable resolution heat maps accroding to a stopping rule
+#' @param dataset data frame with spatial data: x-coordinates (x), y coordinates (y), and Bernoulli responses at those locations (res)
 #' @param cutoff Box subdivisions cease when a box sample size drops below the cutoff
 #' @param fun Function to apply to responses in each box
-#' @param dataset data frame with spatial data: x-coordinates (x), y coordinates (y), and Bernoulli responses at those locations (res)
+
 #' @param max The maximum number of subdivision iterations the algorithm will perform
 #' @return A list containing a data frame for each iteration of the subdivision algorithm; and a vector of the number of boxes eligible for subdivision at each iteration.
 #' @export
@@ -13,6 +14,8 @@
 #' mapit(data[[4]])
 
 varyres <- function(dataset, cutoff, fun = mean,  max = 6){
+  vars <- names(dataset)
+  if(!("x" %in% vars & "y" %in% vars & "res" %in% vars)){stop("One or more of the required variables does not exist")}
 
 info_list <- list()       # list of information, for return()
 iter <- 0                 # subdivision iterations
