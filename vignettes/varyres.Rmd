@@ -10,9 +10,8 @@ vignette: >
 ---
 
 ```{r, echo=FALSE, fig.height=2, fig.width=2, message=FALSE, warning=FALSE}
-  library(ggplot2)
-  devtools::load_all()
-  data(hitter)
+library(varyres)
+library(ggplot2)
 ```
 
 Variable-resolution (VR) heat maps are a solution to the problem of choosing a resolution for a heatmap.  They integrate region-appropriate resolutions, and convey the relative data abundance of data in those regions. 
@@ -20,12 +19,10 @@ Variable-resolution (VR) heat maps are a solution to the problem of choosing a r
 Consider the scatterplot of the locations of pitches to baseball player Jhonny Peralta in the MLB from 2008 to 2015 in (a) below.  To visualize his success at various locations we might create a heatmap of his success rate by gridding the domain and calculating the empirical success rate of pitches in each grid cell.  Examples of the resulting heatmap for resolutions of 4x4 and 16x16 are shown in (b) and (c).  Which resolution is more appropriate? In some areas of the domain, i.e. the center, the 4x4 resolution is too low but in others, i.e. the edges, the 16x16 resolution is too high.  A variable-resolution heatmap, (d), solves this problem by allowing the resolution to be determined by the underlying concentration of data points.
 
 ```{r motivating-plots, echo = FALSE, fig.height=2, fig.width=2, message=FALSE, warning=FALSE, fig.cap = "Caption"}
-library(varyres)
 library(ggplot2)
 
 no_axis_labs <- theme(axis.title.x=element_blank(),
   axis.title.y=element_blank())
-
 
 # a
 ggplot(hitter, aes(x, y)) +
@@ -37,18 +34,18 @@ ggplot(hitter, aes(x, y)) +
 vr_1 <- varyres(data = hitter, cutoff = 1, max = 4)
 
 # b
-mapit(vr_1[[3]]) + spec_fcn(g = FALSE, upper = 0.5) +
+mapit(vr_1[[3]]) +
   no_axis_labs +
   labs(title = "(b)") 
 
 # c
-mapit(vr_1[[5]]) + spec_fcn(g = FALSE, upper = 0.5) +
+mapit(vr_1[[5]])  +
   no_axis_labs +
   labs(title = "(c)") 
 
 vr_200 <- varyres(data = hitter, cutoff = 200, max = 4)
 
-mapit(vr_200[[5]]) + spec_fcn(g = FALSE, upper = 0.5) +  
+mapit(vr_200[[5]]) +  
   no_axis_labs +
   labs(title = "(d)") 
 ```
@@ -81,7 +78,7 @@ head(hitter)
 
 * `x` gives the horizontal location of the pitch as it passes through the strike zone, in feet from the middle of home plate.
 * `y` gives the vertical location of the pitch as it passes through the strike zone, in feet from the ground.
-* `res` is a Bernoulli random variable that equals 1 if the swing was successful, and 0 if not.
+* `res` is a variable that equals 1 if the swing was successful, and 0 if not.
 * `des` gives a short description of the play.
 
 ### A Variable-Resolution Heat Map
@@ -93,39 +90,42 @@ For example, the subdivision presented above in (d), was calculated with,
 vr <- varyres(data = hitter, cutoff = 200, max = 4)
 ```
 
-The resulting object, `vr`, is a list where each element describes an iteration of the subdivision algorithm.  The ?? element contains the final iteration and can then be displayed
-```{r, fig.width = 4, fig.height = 4}
-mapit(vr[[5]]) 
+The resulting object, `vr`, is a list where each element describes an iteration of the subdivision algorithm.  The last element contains the final iteration and can then be displayed
+```{r, fig.width = 4, fig.height = 4, fig.align = "center"}
+mapit(vr[[5]], g = TRUE) 
 ```
 
 The VR map has finer resolution in the center, more coarse resolution around the edges, and in-between as needed. Also, notice how the box sizes implicitly convey the varying data concentration: bigger boxes correspond to less data, smaller boxes to more data. The sample sizes printed on the grid boxes explicitly show this correspondence.
 
 ## Details
 
-The `cutoff` argument gives the user control over how populated boxes will be. For example, `cutoff = 100` gives this map.
+The `cutoff` argument gives the user control over maximum box sample size. For example, `cutoff = 100` means each box will have at most 100 observations, which gives this map.
 
-```{r,  fig.height=3, fig.width=3, fig.align = "center", echo = FALSE}
+```{r,  fig.height=4, fig.width=4, fig.align = "center", echo = FALSE}
 vr <- varyres(data = hitter, cutoff = 100, max = 5)
-mapit(vr[[6]]) + spec_fcn()
+mapit(vr[[6]], g = TRUE) 
 ```
 
 Notice one prominent difference: smaller central boxes, due to further subdivision.
 
-[Add something about `max` argument] 
+The `max` argument specifices a maximum number of iterations. For example, if you accidentally specify `cutoff = 0` the algorithm would never stop without `max = 6` as the default.
 
-[Add something about adding the numbers to boxes] 
+You may want to add box sample size to your plot, and it's pretty easy to do with the data stored in `vr` and `geom_text()`.
+```{r,  fig.height=4, fig.width=4, fig.align = "center"}
+library(ggplot2)
+mapit(vr[[4]], g = TRUE) + 
+  geom_text(aes(label = count), size = 4)
+```
 
 ## Iterations
 
 `varyres(...)` returns the subdivision iterations, and seeing these steps helps understand how the algorithm works. The sequence of subdivisions here proceeds by subdividing boxes with sample sizes above `cutoff = 100`.
 
 ```{r, fig.width = 1.5, fig.height = 1.5, echo = FALSE}
-vr <- varyres(data = hitter, cutoff = 100, max = 5)
-
-mapit(vr[[1]]) + spec_fcn(g = FALSE) + nal_fcn()
-mapit(vr[[2]]) + spec_fcn(g = FALSE) + nal_fcn()
-mapit(vr[[3]]) + spec_fcn(g = FALSE) + nal_fcn()
-mapit(vr[[4]]) + spec_fcn(g = FALSE) + nal_fcn()
-mapit(vr[[5]]) + spec_fcn(g = FALSE) + nal_fcn()
-mapit(vr[[6]]) + spec_fcn(g = FALSE) + nal_fcn()
+mapit(vr[[1]]) + no_axis_labs
+mapit(vr[[2]]) + no_axis_labs
+mapit(vr[[3]]) + no_axis_labs 
+mapit(vr[[4]]) + no_axis_labs 
+mapit(vr[[5]]) + no_axis_labs 
+mapit(vr[[6]]) + no_axis_labs 
 ```
